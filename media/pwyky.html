@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" >
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>pwyky: A Python Wiki</title>
+<style type="text/css">
+<!-- 
+body { 
+   margin: 1.5em 2em 1.5em 1.5em; 
+   font-family: Georgia, sans-serif; 
+}
+
+h1, h2 { 
+   font-family: Tahoma, "Gill Sans", sans-serif; 
+   font-weight: normal; 
+}
+
+address { 
+   font-size: small; 
+   padding-top: 0.35em; 
+   border-top: 2px solid #069; 
+   font-style: normal; 
+}
+
+address a.edit { 
+   font-variant: small-caps; 
+}
+
+div.about { 
+   float: right; 
+   font-size: 0.95em; 
+}
+
+a.nonexistent { 
+   color: #000; 
+}
+
+a.nonexistent:after { 
+   vertical-align: top; 
+   font-size: x-small; 
+   content: "?"; 
+   text-decoration: none; 
+}
+
+pre { margin-left: 1.5em; }
+
+blockquote { 
+   padding-left: 0.5em; 
+   border-left: 0.3em solid #99c; 
+}
+
+blockquote:after { 
+   font-size: small; 
+   content: "--" attr(cite); 
+}
+
+blockquote pre { 
+   font-family: Georgia, sans-serif; 
+}
+
+h1 .smallcaps { 
+   font-weight: bold; 
+}
+
+.smallcaps { 
+   font-variant: small-caps; 
+}
+-->
+</style>
+</head>
+<body>
+
+<h2>The Syntax</h2>
+
+<p>Summary: </p>
+<ul>
+<li>Paragraphs are seperated by blank lines.</li>
+<li>"@ " starts a heading.</li>
+<li>"* " starts a list item.</li>
+<li>"{{{" and "}}}" on seperate lines delimit preformatted blocks.</li>
+<li>"[[[" and "]]]" delimit blockquotes.</li>
+<li>"{" and "}" in paragraphs, headings, and list items delimit links.</li>
+</ul>
+
+<p>Example: </p>
+
+<pre>
+@ Heading
+
+Paragraph.
+
+* Bulleted list.
+* Bullets can extend over
+two lines.
+* Third item in the list.
+
+{{{
+Preformattted area.
+&#x7D;}}
+
+[[[
+A quote
+]]] - http://example.org/citation
+
+Links: {LocalLink} will link to ./LocalLink, {Local Link} will 
+link to the same, and {http://example.org/ example.org} will be a 
+titled link to example.org.
+</pre>
+
+<h2>Formatting: Hints and Tips</h2>
+
+<p>Generally: </p>
+
+<ul>
+<li>"{U+HHHH}" will enter a unicode character, in any section (except 
+for blockquote citations). All printable characters except -, ], and } 
+will be added as-is; entities are used for the rest.</li>
+<li>Take care to leave a blank line in front of list sections.</li>
+<li>An "@ Heading" on the very first line will be taken as an &lt;h1>; 
+all other headings will be taken as &lt;h2>s.</li>
+<li>Citations for blockquotes must be valid URIs.</li>
+<li>Note that headings can't extend over more than one line. They have 
+a double space inserted after them on conversion back to wiki format, 
+anyway.</li>
+</ul>
+
+<p>In paragraphs, headings, and list items: </p>
+
+<ul>
+<li>"{{" will be escaped to "{". This allows you, for example, to type 
+an unescaped "{U+HH}" by typing "{{U+HH}".</li>
+<li>On many occasions, em-dashes will be automatically converted from 
+"&#x2D;-". To type "&#x2D;-", you can do something like "{U+2D}-".</li>
+</ul>
+
+<p>In preformatted sections, and blockquotes: </p>
+
+<ul>
+<li>Note that em-dashes do not get escaped, and nor do links get resolved. 
+{$function} and {U+HHHH} do get resolved, though.</li>
+<li>If you want to use "}}}" in a preformatted section, you can do "{U+7D}}}". 
+It would also be acceptible to put the escaped reference in any other part 
+of the "}}}". Likewise "{U+5D}]]" for "]]]".</li>
+</ul>
+
+</body>
+</html>
