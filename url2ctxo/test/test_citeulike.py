@@ -33,5 +33,21 @@ class CiteulikeTest(unittest.TestCase):
         author_list = c.authors
         self.assertEqual(author_list, ['Au, Yoris A.','Kauffman, Robert J.'])
 
+    def testDOI(self):
+        metadata = { 'linkouts': '{DOI {} 10.1109/5254.769885 {} {}} {IEEE 769885 {} {} {}}' }
+        c = citeulike.Citation(metadata)
+        doi = c.doi
+        self.assertEqual(doi, '10.1109/5254.769885')
+        metadata = { 'linkouts': '{DOI {} {} {} {}} {IEEE 769885 {} {} {}}' }
+        c = citeulike.Citation(metadata)
+        doi = c.doi
+        self.assertEqual(doi, None)
+
+    def testGenre(self):
+        c = citeulike.Citation({ 'type' : 'JOUR' })
+        self.assertEqual(c.genre, 'journal')
+        c = citeulike.Citation({ 'type' : 'BOOK' })
+        self.assertEqual(c.genre, 'book')
+
 if __name__ == '__main__':
     unittest.main()

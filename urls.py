@@ -11,6 +11,7 @@ urlpatterns = patterns('',
 )
 
 urlpatterns = patterns('url2ctxo.views',
+    (r'^apps/url2ctxo/bookmarklet', 'bookmarklet'),
     (r'^apps/url2ctxo/?', 'url2ctxo'),
 )
 

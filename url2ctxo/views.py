@@ -1,8 +1,10 @@
 # Create your views here.
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.template import Context, loader
+from django.shortcuts import render_to_response
 from urlparse import urlparse
 import re
+import shelve
 import simplejson
 import hashlib
 from time import time
@@ -11,12 +13,16 @@ from couchdb import Server
 from collector.views import get_or_create_db
 from openurl import Ctxo
 import citeulike
+from urllib import urlencode
 
 import logging
 logger = logging.getLogger("url2ctxo")
 
 DRIVER_PATH = '/usr/local/lib/citeulike-plugins/driver.tcl'
 CACHE_TTL = 60 * 60 * 24
+
+def bookmarklet(request):
+    return render_to_response('url2ctxo/bookmarklet.html')
 
 def url2ctxo(request):
     try: 
@@ -25,37 +31,47 @@ def url2ctxo(request):
         return HttpResponseBadRequest("No URL provided")
 
     callback = request.GET.get('callback', None)
-    format = request.GET.get('format', 'json')
+    format = request.GET.get('format', None)
 
     if not re.match(r"https?://[-\w.]+\.[^\s]*", url, re.I):
         logger.info("Got bad url: %s" % url)
         return HttpResponseBadRequest("Bad URL")
 
-    try:
-        citation = citeulike.url2citation(DRIVER_PATH, url)
-    except Exception, e:
-        logger.error(str(e))
-        return HttpResponse(str(e), content_type="text/html")
+    citation = _check_cache(url)
+    if not citation:
+        try:
+            citation = citeulike.url2citation(DRIVER_PATH, url)
+            _cache(url, citation)
+            logger.info(citation)
+        except Exception, e:
+            logger.error(str(e))
+            return HttpResponse(str(e), content_type="text/html")
         
     try:
         ctxo = _citation2ctxo(citation)
     except Exception, e:
-        return HttpResponse(str(e), content_type="text/html")
+        logger.info(e)
+        return HttpResponse('Sorry. Caught exception: %s, %s ' % (type(e), e.message), content_type="text/html")
         
-#    resp = ctxo.as('format')
-    resp = citation.as_json()
-
     if format == 'json' and callback:
-        return HttpResponse("%s(%s);" % (callback, json), content_type="text/javascript")
+        return HttpResponse("%s(%s);" % (callback, simplejson.dumps(ctxo)), content_type="text/javascript")
+    elif format == 'json':
+        return HttpResponse(simplejson.dumps(ctxo), content_type="text/javascript")
     else:
-        return HttpResponse(resp, content_type="text/javascript")
+        context = {
+            'ctxo_json': simplejson.dumps(ctxo, indent=True),
+            'ctxo_url': urlencode(ctxo),
+            'url': url,
+            'atitle': ctxo['rft.atitle']
+            }
+        return render_to_response('url2ctxo/ctxo.html', context)
 
-def _cache(url, cdata):
+def _cache(url, c):
     db = get_or_create_db('url2ctxo')
     md5 = hashlib.md5()
     md5.update(url)
     id = md5.hexdigest()
-    db[id] = {'timestamp': time(), 'cdata': cdata}
+    db[id] = {'timestamp': time(), 'citation': c.__dict__}
 
 def _check_cache(url):
     db = get_or_create_db('url2ctxo')
@@ -69,9 +85,26 @@ def _check_cache(url):
         logger.debug("%s,%s" % (cachehit['timestamp'], time() - CACHE_TTL))
         if cachehit['timestamp'] > (time() - CACHE_TTL):
             logger.debug('returning cached result')
-            return cachehit['cdata']
+            return citeulike.fromdict(cachehit['citation'])
     return None
 
 def _citation2ctxo(citation):
-    ctxo = Ctxo()
-        
+    ctxo = {}
+    ctxo['url_ver'] = 'Z39.88-2004'
+    ctxo['rft_val_fmt'] = 'info:ofi/fmt:kev:mtx:' + citation.genre
+    ctxo['rft.spage'] = citation.start_page
+    ctxo['rft.issue'] = citation.issue
+    ctxo['rft.vol'] = citation.volume
+    ctxo['rft.jtitle'] = citation.journal
+    ctxo['rft.atitle'] = citation.title
+    if citation.doi:
+        ctxo['rft_id'] = 'doi:%s' % citation.doi
+    if citation.authors:
+        ctxo['rft.au'] = citation.authors[0]
+    try:
+        ctxo['rft.date'] = '-'.join([citation.year, citation.month, citation.day])
+    except:
+        pass
+    logger.debug(str(ctxo))
+    return ctxo
+
