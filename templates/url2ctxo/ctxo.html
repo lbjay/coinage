@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>CTXO Display</title>
+<style type="text/css">
+div { margin: 10px auto; padding: 10px }
+pre { padding: 5px; background-color: #eee }
+</style>
+</head>
+<body>
+<div>
+<h3>URL: <a href="{{url}}">{{url}}</a><h3>
+<h5>CTXO in key-encoded value format</h5>
+<input type="text" size="50" value="{{ctxo_url}}"/>
+<h5>CTXO as a COinS</h5>
+<textarea rows="10" cols="80" wrap="wrap">
+<span class="Z3988" title="{{ctxo_url}}">
+{{atitle}}
+</span>
+</textarea>
+<h5>CTXO as JSON:</h5>
+<pre>{{ctxo_json}}</pre>
+</div>
+</body>
+</html>
