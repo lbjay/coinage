@@ -4,7 +4,7 @@ var CoinopEngine = function() {
     if (typeof console == 'undefined')
         window.console = { log: function() {}, trace: function() {} };
 
-    var baseUrl = '{{ baseurl }}';
+    var baseUrl = '{{ baseurl }}/apps';
     var siteName = '{{ sitename }}';
     var resregUrl = baseUrl + '/coinop/resreg/';
 
@@ -21,7 +21,9 @@ var CoinopEngine = function() {
         init: function() {
             console.log("Initializing...");
             var coins = $('span.Z3988');
-            $.getJSON(resregUrl + '?site=' + siteName + '&jsoncallback=?', function(data) {
+            var reqURL = resregUrl + '?site=' + siteName + '&jsoncallback=?';
+            console.log('Querying: ' + reqURL);
+            $.getJSON(reqURL, function(data) {
                 console.log(data);
                 $(data).each(function(i) {
                     var resolver = this;

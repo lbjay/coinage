@@ -20,12 +20,12 @@ var CollectorEngine = function() {
 
     return {
         collect: function() {
-            //if ($('link[rel="unapi-server"]'))
-            //{
-            //    alert('unapi!');
-            //}
-            //else
-            //{
+            if ($('link[rel="unapi-server"]'))
+            {
+                console.log('unapi!');
+            }
+            else
+            {
                 var coins = _findCtxos();
                 $.each(coins, function(ctxo){
                     var url = logUrl + '?ctxo=' + encodeURIComponent(ctxo);
@@ -34,7 +34,7 @@ var CollectorEngine = function() {
                         console.log('Couch doc ' + data['couchid'] + ' saved');
                     });
                 });
-            //}
+            }
         }
     };
 }();
